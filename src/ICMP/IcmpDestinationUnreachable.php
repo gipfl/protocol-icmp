@@ -2,6 +2,8 @@
 
 namespace gipfl\Protocol\ICMP;
 
+use function unpack;
+
 class IcmpDestinationUnreachable extends IcmpPacket
 {
     protected $type = 3;
@@ -12,7 +14,7 @@ class IcmpDestinationUnreachable extends IcmpPacket
      *
      * @var array
      */
-    protected static $validCodes = array(
+    protected static $validCodes = [
         0 => 'Destination network unreachable',
         1 => 'Destination host unreachable',
         2 => 'Destination protocol unreachable',
@@ -29,7 +31,7 @@ class IcmpDestinationUnreachable extends IcmpPacket
         13 => 'Communication administratively prohibited',
         14 => 'Host Precedence Violation',
         15 => 'Precedence cutoff in effect',
-    );
+    ];
 
     protected $nextHopMtu;
 
@@ -64,7 +66,7 @@ class IcmpDestinationUnreachable extends IcmpPacket
     public function parseHeaderFields($fields)
     {
         if ($this->code === 4) {
-            $parts = \unpack('nunused/nnextmtu', $fields);
+            $parts = unpack('nunused/nnextmtu', $fields);
             $this->nextHopMtu = $parts['nextmtu'];
         }
     }

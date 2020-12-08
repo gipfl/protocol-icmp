@@ -2,6 +2,10 @@
 
 namespace gipfl\Protocol\ICMP;
 
+use function pack;
+use function strlen;
+use function unpack;
+
 class IcmpEchoRequest extends IcmpPacket
 {
     protected $type = 8;
@@ -57,7 +61,7 @@ class IcmpEchoRequest extends IcmpPacket
 
     public function getHeadFields()
     {
-        return \pack('n', $this->identifier) . \pack('n', $this->sequenceNumber);
+        return pack('n', $this->identifier) . pack('n', $this->sequenceNumber);
     }
 
     public function setBody($body)
@@ -78,7 +82,7 @@ class IcmpEchoRequest extends IcmpPacket
 
     public function parseHeaderFields($fields)
     {
-        $parts = \unpack('nidentifier/nsequence', $fields);
+        $parts = unpack('nidentifier/nsequence', $fields);
         $this->identifier = $parts['identifier'];
         $this->sequenceNumber = $parts['sequence'];
 

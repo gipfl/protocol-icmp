@@ -2,6 +2,8 @@
 
 namespace gipfl\Protocol\ICMP;
 
+use function unpack;
+
 class IcmpEchoReply extends IcmpPacket
 {
     protected $type = 0;
@@ -10,9 +12,9 @@ class IcmpEchoReply extends IcmpPacket
 
     protected $sequenceNumber;
 
-    protected static $validCodes = array(
+    protected static $validCodes = [
         0 => 'Echo reply'
-    );
+    ];
 
     public function parsePayload($payload)
     {
@@ -32,7 +34,7 @@ class IcmpEchoReply extends IcmpPacket
 
     public function parseHeaderFields($fields)
     {
-        $parts = \unpack('nidentifier/nsequence', $fields);
+        $parts = unpack('nidentifier/nsequence', $fields);
         $this->identifier = $parts['identifier'];
         $this->sequenceNumber = $parts['sequence'];
 

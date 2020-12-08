@@ -2,6 +2,8 @@
 
 namespace gipfl\Protocol\ICMP;
 
+use function unpack;
+
 /**
  * Time Exceeded is sent when a gateway finds zero TTL in a packet
  */
@@ -15,10 +17,10 @@ class ICMPTimeExceeded extends IcmpPacket
      *
      * @var array
      */
-    protected static $validCodes = array(
+    protected static $validCodes = [
         0 => 'Time to live exceeded in transit',
         1 => 'Fragment reassembly time exceeded',
-    );
+    ];
 
     protected $nextHopMtu;
 

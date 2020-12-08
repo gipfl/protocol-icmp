@@ -4,6 +4,17 @@ namespace gipfl\Protocol\ICMP;
 
 use Exception;
 use gipfl\Protocol\Exception\ProtocolError;
+use function is_resource;
+use function microtime;
+use function socket_bind;
+use function socket_create;
+use function socket_getsockname;
+use function socket_last_error;
+use function socket_recvfrom;
+use function socket_select;
+use function socket_set_option;
+use function socket_strerror;
+use function sprintf;
 
 class ICMPSocket
 {
@@ -37,7 +48,7 @@ class ICMPSocket
      */
     public function send(IcmpPacket $packet, $destinationHost)
     {
-        $packet->setSendTime(\microtime(true));
+        $packet->setSendTime(microtime(true));
         $this->sendTo($destinationHost, (string) $packet);
 
         return $this;
@@ -78,17 +89,18 @@ class ICMPSocket
             $expect = [];
             // $changed = socket_select($read, $write, $expect, 0, 150000);
             if (empty($result)) {
-                $changed = \socket_select($read, $write, $expect, 3);
+                $changed = socket_select($read, $write, $expect, 3);
             } else {
-                $changed = \socket_select($read, $write, $expect, 0);
+                $changed = socket_select($read, $write, $expect, 0);
             }
             if ($changed === null) {
                 throw new ProtocolError('Cannot read from ICMP socket');
-            } elseif ($changed === 0) {
+            }
+            if ($changed === 0) {
                 break;
             }
 
-            if (\is_resource($socket)) { // Stupid but may help when stressed
+            if (is_resource($socket)) { // Stupid but may help when stressed
                 if ($packet = $this->readPacketFromPeer()) {
                     $result[] = $packet;
                 } else {
@@ -110,8 +122,8 @@ class ICMPSocket
         $ip = $port = null;
         $socket = $this->getSocket();
 
-        $now = \microtime(true);
-        $size = @\socket_recvfrom($socket, $ret, 65535, 0, $ip, $port);
+        $now = microtime(true);
+        $size = @socket_recvfrom($socket, $ret, 65535, 0, $ip, $port);
         if (! $size) {
             return false;
         }
@@ -127,7 +139,7 @@ class ICMPSocket
         if ($ret === false) {
             throw new ProtocolError(sprintf(
                 'Cannot read from peer: %s',
-                \socket_strerror(\socket_last_error($socket))
+                socket_strerror(socket_last_error($socket))
             ));
         }
 
@@ -141,14 +153,14 @@ class ICMPSocket
      */
     public static function createRawIcmpSocket($localIp = '0.0.0.0')
     {
-        $socket = \socket_create(AF_INET, SOCK_RAW, getprotobyname('ICMP'));
-        \socket_bind($socket, $localIp);
-        if (! \socket_getsockname($socket, $localIp)) {
+        $socket = socket_create(AF_INET, SOCK_RAW, getprotobyname('ICMP'));
+        socket_bind($socket, $localIp);
+        if (! socket_getsockname($socket, $localIp)) {
             // TODO: detailed error, mention required capability
             throw new ProtocolError('Could not prepare local ICMP socket');
         }
 
-        \socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array(
+        socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array(
             'sec'  => 0,
             //'usec' => 100000
             'usec' => 1000

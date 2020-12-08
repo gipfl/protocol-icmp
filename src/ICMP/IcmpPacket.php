@@ -3,12 +3,16 @@
 namespace gipfl\Protocol\ICMP;
 
 use gipfl\Protocol\Exception\ProtocolError;
-use InvalidArgumentException;
 use gipfl\Protocol\IPv4\IPv4Header;
+use InvalidArgumentException;
+use function pack;
+use function sprintf;
+use function substr;
+use function unpack;
 
 abstract class IcmpPacket
 {
-    protected static $typeMap = array(
+    protected static $typeMap = [
         0 =>  'IcmpEchoReply',
         3 =>  'IcmpDestinationUnreachable',
         // 4 =>  'IcmpSourceQuench',
@@ -19,7 +23,7 @@ abstract class IcmpPacket
         // 14 => 'IcmpTimestampReply',
         // 15 => 'IcmpInformationRequest',
         // 16 => 'IcmpInformationReply',
-    );
+    ];
 
     protected $type;
 
@@ -85,8 +89,7 @@ abstract class IcmpPacket
     public static function create($code = 0)
     {
         $class = get_called_class();
-        $obj = new $class($code);
-        return $obj;
+        return new $class($code);
     }
 
     public function getIpHeader()
